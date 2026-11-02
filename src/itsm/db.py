@@ -63,7 +63,7 @@ PRIORITIES = ("P1", "P2", "P3", "P4")
 ASSET_STATUSES = ("active", "stock", "maintenance", "retired")
 RECORD_EDIT_FIELDS = (
     "title", "description", "requester", "assignee", "category", "priority",
-    "asset_id", "problem_id", "target_at", "risk", "implementation_plan",
+    "asset_id", "problem_id", "sla_policy_id", "target_at", "risk", "implementation_plan",
     "rollback_plan", "planned_start", "planned_end", "resolution",
 )
 ASSET_FIELDS = ("tag", "name", "asset_type", "serial", "owner", "location", "status", "notes")
@@ -152,7 +152,8 @@ def init_db(path: str | Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     with connect(path) as db:
         db.executescript(SCHEMA)
-        db.execute("PRAGMA user_version=1")
+        from itsm import sla
+        sla.init_schema(db)
     return path
 
 def row_dict(row):
@@ -180,7 +181,7 @@ def clean_record(payload, is_new=False):
         raise ValueError("Tentativa de alterar campo protegido.")
     values = {}
     for key, value in payload.items():
-        if key in ("asset_id", "problem_id"):
+        if key in ("asset_id", "problem_id", "sla_policy_id"):
             values[key] = int(value) if value else None
         else:
             values[key] = str(value or "").strip()
@@ -212,7 +213,10 @@ def get_record(path, record_id):
 def create_record(path, kind, data, actor="local"):
     if kind not in KINDS:
         raise ValueError("Tipo de registro inválido.")
+    from itsm import sla
     values = clean_record(data, is_new=True)
+    explicit_sla = "sla_policy_id" in values
+    sla_id = values.pop("sla_policy_id", None)
     now = utc_now()
     with connect(path) as db:
         validate_problem_link(db, values.get("problem_id"))
@@ -227,12 +231,17 @@ def create_record(path, kind, data, actor="local"):
         record_id = cur.lastrowid
         code = f"{KINDS[kind][0]}-{record_id:06d}"
         db.execute("UPDATE records SET code=? WHERE id=?", (code, record_id))
+        sla.assign_record(db, record_id, kind, values.get("priority", "P3"),
+                          requested=sla_id, automatic=not explicit_sla, at=now)
         after = row_dict(db.execute("SELECT * FROM records WHERE id=?", (record_id,)).fetchone())
         record_audit(db, "record", record_id, "created", actor, {}, after)
     return record_id
 
 def update_record(path, record_id, data, actor="local"):
+    from itsm import sla
     values = clean_record(data)
+    explicit_sla = "sla_policy_id" in values
+    sla_id = values.pop("sla_policy_id", None)
     if not values:
         return
     with connect(path) as db:
@@ -242,12 +251,25 @@ def update_record(path, record_id, data, actor="local"):
         if "problem_id" in values:
             validate_problem_link(db, values["problem_id"], record_id)
         changed = {key: val for key, val in values.items() if before[key] != val}
-        if not changed:
+        # Se a prioridade mudou, a política atual deve continuar compatível.
+        # A troca de SLA exige decisão explícita; não trocar silenciosamente.
+        if "priority" in changed and before["sla_policy_snapshot"] and not explicit_sla:
+            snapshot = json.loads(before["sla_policy_snapshot"])
+            if snapshot["priority"] not in ("*", changed["priority"]):
+                raise ValueError(
+                    "Prioridade mudou: selecione uma política SLA compatível ou Sem SLA."
+                )
+        if not changed and not explicit_sla:
             return
-        changed["updated_at"] = utc_now()
-        assignments = ", ".join(f"{key}=?" for key in changed)
-        db.execute(f"UPDATE records SET {assignments} WHERE id=?",
-                   (*changed.values(), record_id))
+        if changed:
+            changed["updated_at"] = utc_now()
+            assignments = ", ".join(f"{key}=?" for key in changed)
+            db.execute(f"UPDATE records SET {assignments} WHERE id=?",
+                       (*changed.values(), record_id))
+        if explicit_sla:
+            effective_priority = changed.get("priority", before["priority"])
+            sla.assign_record(db, record_id, before["kind"], effective_priority,
+                              requested=sla_id, automatic=False)
         after = row_dict(db.execute("SELECT * FROM records WHERE id=?", (record_id,)).fetchone())
         record_audit(db, "record", record_id, "updated", actor, before, after)
 
