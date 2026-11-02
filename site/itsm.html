@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PT2VHF ITSM | Projeto de gestão de serviços de TI</title>
+<meta name="description" content="Projeto PT2VHF ITSM 0.3.0: gestão de incidentes, requisições, mudanças, problemas, ativos, SLA e CMDB para Windows.">
+<style>
+:root{color-scheme:dark;--bg:#0c1320;--panel:#172436;--text:#eef5fc;--sub:#b9c9d8;--line:#344c64;--accent:#63dbc6;--link:#83c9ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--text)}
+a{color:var(--link)}a:focus-visible{outline:3px solid #ffd180;outline-offset:3px}
+.wrap{max-width:1120px;margin:auto;padding:0 24px}header{padding:17px 0;border-bottom:1px solid var(--line)}header .wrap{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}header nav{display:flex;gap:22px;flex-wrap:wrap}header a{text-decoration:none}header strong{font-size:1.3rem;color:var(--text)}
+.hero{padding:72px 0;background:radial-gradient(circle at 95% 5%,#18425f,transparent 50%)}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:.83rem}
+h1{font-size:clamp(2.4rem,6vw,4.7rem);letter-spacing:-.045em;line-height:1.1;margin:15px 0 22px}h1 span{color:var(--accent)}
+h2{font-size:clamp(1.6rem,3vw,2.2rem)}.lead{font-size:1.18rem;color:var(--sub);max-width:810px}.muted{color:var(--sub)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin:28px 0}.btn{background:#20629b;border:1px solid #4282bb;color:white;text-decoration:none;font-weight:700;border-radius:9px;padding:12px 18px}.btn.secondary{background:transparent;border-color:var(--line)}
+section{padding:52px 0}.alternate{background:#111e2d;border-block:1px solid var(--line)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);padding:22px;border-radius:15px}.card h3{margin:0 0 7px}.card p{margin:0;color:var(--sub)}.stats{display:flex;gap:24px;flex-wrap:wrap;margin-top:26px}.stats span{border:1px solid var(--line);border-radius:12px;padding:12px 18px}.stats b{display:block;font-size:1.6rem;color:var(--accent)}
+.notice{padding:18px 20px;border-left:4px solid #ffc67b;background:#25271f;border-radius:5px}footer{border-top:1px solid var(--line);color:var(--sub);padding:24px 0}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.grid{grid-template-columns:1fr}.hero{padding:45px 0}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><a href="/" aria-label="Ir para a página inicial"><strong>ALEXPMR</strong></a><nav aria-label="Navegação"><a href="/">Início</a><a href="#funcionalidades">Funcionalidades</a><a href="#roadmap">Roadmap</a><a href="#download">Download</a></nav></div></header>
+<main>
+<div class="hero"><div class="wrap"><div class="eyebrow">Projetos · Software · ITSM</div><h1>PT2VHF <span>ITSM</span></h1>
+<p class="lead">Sistema desktop experimental para gestão de serviços de TI: fluxos operacionais, SLA reutilizável, inventário patrimonial e CMDB transversal com análise de dependências.</p>
+<div class="actions"><a class="btn" href="#download">Obter versão Windows</a><a class="btn secondary" href="https://github.com/alexpmr/ITSM" target="_blank" rel="noopener noreferrer">Repositório GitHub</a></div>
+<p class="muted"><strong>MVP 0.3.0</strong> · Windows x64 · Python, PySide6 e SQLite · Em desenvolvimento</p>
+<div class="stats"><span><b>7</b>práticas com MVP parcial</span><span><b>27</b>práticas planejadas</span><span><b>34</b>práticas no mapa ITIL (Version 5)</span></div>
+</div></div>
+<section id="funcionalidades"><div class="wrap"><h2>Funcionalidades</h2><p class="muted">Módulos implementados parcialmente; não há alegação de certificação ou conformidade integral.</p>
+<div class="grid">
+<article class="card"><h3>Incidentes</h3><p>Registro, priorização, triagem, resolução, reabertura e histórico.</p></article>
+<article class="card"><h3>Requisições</h3><p>Abertura, decisão de aprovação declaratória, atendimento e encerramento.</p></article>
+<article class="card"><h3>Mudanças</h3><p>Avaliação, aprovação, janela planejada, implementação e rollback.</p></article>
+<article class="card"><h3>Problemas</h3><p>Investigação, erro conhecido, resolução e vínculo com registros.</p></article>
+<article class="card"><h3>Ativos de TI</h3><p>Cadastro patrimonial, identificação, responsável, localização e situação.</p></article>
+<article class="card"><h3>SLA transversal</h3><p>Metas de resposta e resolução, calendários, feriados e períodos de pausa.</p></article>
+<article class="card"><h3>CMDB transversal</h3><p>Itens de configuração, dependências direcionais, vínculo aos registros e análise topológica de impacto.</p></article>
+<article class="card"><h3>Mapa ITIL</h3><p>Visualização interativa das 34 práticas, destacando o que já está implementado.</p></article>
+<article class="card"><h3>Operação local</h3><p>Dashboard, histórico, exportação CSV e backup de base SQLite.</p></article>
+</div></div></section>
+<section class="alternate" id="roadmap"><div class="wrap"><h2>Próximas etapas</h2><div class="grid">
+<article class="card"><h3>Catálogo de serviços</h3><p>Ofertas e modelos reutilizáveis por incidentes, requisições e demais práticas.</p></article>
+<article class="card"><h3>CMDB corporativa</h3><p>Descoberta, reconciliação, baselines e integrações com infraestrutura.</p></article>
+<article class="card"><h3>Segurança e IA assistiva</h3><p>Autenticação, controle de acesso, API e consultas auditáveis em linguagem natural.</p></article>
+</div><p><a href="https://github.com/alexpmr/ITSM/issues" target="_blank" rel="noopener noreferrer">Acompanhar backlog e issues</a></p></div></section>
+<section id="download"><div class="wrap"><h2>Windows x64 e código-fonte</h2><p class="muted">Build portátil 0.3.0 gerado com testes automatizados no GitHub Actions.</p>
+<div class="actions"><a class="btn" href="https://github.com/alexpmr/ITSM/actions/runs/41526651676" target="_blank" rel="noopener noreferrer">Abrir build Windows 0.3.0</a><a class="btn secondary" href="https://github.com/alexpmr/ITSM" target="_blank" rel="noopener noreferrer">Consultar código-fonte</a></div>
+<p class="muted">Abra <strong>Artifacts → PT2VHF-ITSM-Windows-x64</strong>. O artefato da execução de 02/11/2026 expira em 02/12/2026 e pode exigir autenticação no GitHub. Não há link permanente de release.</p>
+<aside class="notice"><strong>Aviso:</strong> aplicação experimental offline, sem autenticação corporativa ou auditoria imutável. Não utilizar como registro oficial de ambientes de produção nem armazenar dados sensíveis. ITIL é marca de seus titulares; este projeto não é afiliado ou certificado pela PeopleCert.</aside>
+</div></section>
+</main>
+<footer><div class="wrap">Projeto PT2VHF ITSM · Alex Rodrigues · <a href="https://github.com/alexpmr/ITSM">GitHub</a></div></footer>
+</body></html>
