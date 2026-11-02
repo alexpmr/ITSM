@@ -143,3 +143,13 @@ def test_schema_migration_is_idempotent(path):
     assert db.get_record(path, rid)["title"] == "Legado"
     with db.connect(path) as conn:
         assert conn.execute("PRAGMA user_version").fetchone()[0] == 2
+
+
+def test_immediate_first_response_same_second(monkeypatch, path):
+    sla.create_policy(path, policy())
+    set_clock(monkeypatch, "2026-11-02T12:00:00+00:00")
+    record_id = db.create_record(path, "incident", {"title": "Resposta imediata"})
+    db.set_status(path, record_id, "triage")
+    result = sla.evaluate(path, record_id, "2026-11-02T12:00:10+00:00")
+    assert result["response"]["completed"]
+    assert result["response"]["elapsed_minutes"] == 0.0

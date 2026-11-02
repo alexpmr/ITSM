@@ -286,6 +286,7 @@ class RecordsTab(QWidget):
         for label, callback in (
             ("Novo", self.create), ("Editar", self.edit),
             ("Alterar estado", self.change_status),
+            ("Ver SLA", self.show_sla),
             ("Aprovar", lambda: self.approve(True)),
             ("Rejeitar", lambda: self.approve(False)),
             ("Atualizar", self.refresh),
@@ -313,6 +314,8 @@ class RecordsTab(QWidget):
                 sla_label = "VIOLADO"
             elif metric["resolution"]["completed"]:
                 sla_label = "Concluído no prazo"
+            elif metric["resolution"]["state"] == "cancelled":
+                sla_label = "Cancelado"
             elif metric["resolution"]["paused"]:
                 sla_label = "Em pausa"
             else:
@@ -379,6 +382,48 @@ class RecordsTab(QWidget):
             self.window.refresh_all()
         except (ValueError, sqlite3.Error) as exc:
             display_error(self, exc)
+
+    def show_sla(self):
+        item_id = self.selected()
+        if item_id is None:
+            return
+        result = sla.evaluate(self.window.path, item_id)
+        if result is None:
+            QMessageBox.information(
+                self, "SLA", "O registro ainda não possui uma política de SLA. "
+                "Configure na aba SLA e atribua uma política compatível."
+            )
+            return
+
+        def fmt(title, values):
+            state = {
+                "running": "Em andamento",
+                "paused": "Pausado",
+                "met": "Concluído no prazo",
+                "breached": "Meta violada",
+                "cancelled": "Cancelado",
+            }.get(values["state"], values["state"])
+            deadline = values["deadline_at"] or (
+                "Indefinido (pausa, encerramento ou meta violada)"
+            )
+            return (
+                f"{title}\n"
+                f"  Situação: {state}\n"
+                f"  Meta: {values['target_minutes']} min úteis\n"
+                f"  Consumido: {values['elapsed_minutes']} min úteis\n"
+                f"  Saldo: {values['remaining_minutes']} min úteis\n"
+                f"  Previsão de vencimento (UTC): {deadline}"
+            )
+
+        text = (
+            f"Política: {result['policy_name']} [{result['policy_code']}]\n"
+            f"Início da medição (UTC): {result['started_at']}\n\n"
+            f"{fmt('PRIMEIRA RESPOSTA', result['response'])}\n\n"
+            f"{fmt('RESOLUÇÃO / CONCLUSÃO', result['resolution'])}\n\n"
+            "A previsão considera a política vinculada e pausas já registradas, "
+            "não pausas futuras."
+        )
+        QMessageBox.information(self, "Medição de SLA", text)
 
     def approve(self, is_approved):
         item_id = self.selected()

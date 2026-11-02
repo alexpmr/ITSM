@@ -340,7 +340,7 @@ def _measure(conn, row, now):
     for event in audit:
         event_at = parse_datetime(event["created_at"])
         status = json.loads(event["after_json"]).get("status")
-        if status and event_at <= start:
+        if status and event_at < start:
             current_state = status
         elif status and event_at <= now:
             all_events.append((event_at, status))
