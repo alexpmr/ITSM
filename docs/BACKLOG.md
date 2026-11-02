@@ -19,7 +19,11 @@ Windows x64 é a plataforma inicial. GitHub é a fonte oficial.
 - [ ] Testes end-to-end de interface em runner Windows e assinatura de código
 
 ## v0.2 — operação e qualidade
-- [ ] SLA real: calendários úteis, regras por serviço, relógios de pausa, escalonamento
+- [x] SLA transversal MVP por prática/prioridade, metas de resposta/resolução, calendário 24x7/útil, feriados e pausas
+- [x] Indicadores SLA no dashboard e nos módulos; mapa ITIL com seis práticas em MVP parcial
+- [ ] SLA por serviço/oferta (depende do catálogo de serviços, issue #6)
+- [ ] Acordos contratuais, OLAs, escalonamento e notificações pré-violação
+- [x] Calendários úteis e relógios de pausa básicos; pendentes regras por serviço, escalonamento e notificações
 - [ ] Incidentes maiores, matriz impacto x urgência e prioridades parametrizáveis
 - [ ] Catálogo de serviços e requisições com modelos e formulários dinâmicos
 - [ ] Mudanças: categorias normal/padrão/emergencial; CAB; plano de teste; PIR; conflito de janelas
@@ -47,6 +51,6 @@ Windows x64 é a plataforma inicial. GitHub é a fonte oficial.
 - [ ] Nunca permitir mudanças/aprovações autônomas sem autorização
 
 ## Critérios de aceite de uso corporativo
-O MVP não possui identidade verificada, perfis, aprovação confiável ou SLA por calendário.
+O MVP não possui identidade verificada, perfis, aprovação confiável ou SLA corporativo governado, mesmo com contagem de calendário no MVP.
 Não utilizar como sistema de registro oficial de produção até concluir os controles
 de segurança, privacidade, auditoria, recuperação e requisitos organizacionais.

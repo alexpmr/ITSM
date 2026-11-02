@@ -14,9 +14,9 @@ def test_itil_map_has_34_unique_practices():
     assert sum(p.group == GROUP_GENERAL for p in PRACTICES) == 12
 
 def test_only_delivered_modules_are_highlighted():
-    assert IMPLEMENTED_MVP == {"incident", "request", "change", "problem", "itam"}
+    assert IMPLEMENTED_MVP == {"incident", "request", "change", "problem", "itam", "service_level"}
     assert set(MODULE_TABS) == IMPLEMENTED_MVP
-    assert counts() == {"total": 34, "mvp": 5, "planned": 29}
+    assert counts() == {"total": 34, "mvp": 6, "planned": 28}
     for key in IMPLEMENTED_MVP:
         assert implementation_status(key) == "mvp"
         assert summary(key)["tab_index"] is not None
@@ -45,3 +45,9 @@ def test_graphical_itil_map_loads_headless(tmp_path):
     assert dialog.open_button.isEnabled()
     dialog.close()
     assert app is not None
+
+
+def test_service_levels_are_highlighted_and_navigable():
+    assert summary("service_level")["status"] == "mvp"
+    assert summary("service_level")["tab_index"] == 6
+    assert "SLA" in summary("service_level")["delivered"]

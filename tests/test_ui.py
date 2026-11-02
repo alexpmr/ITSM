@@ -17,7 +17,7 @@ def test_windows_interface_opens_and_lists_records(tmp_path):
     app = QApplication.instance() or QApplication([])
     path = db.init_db(tmp_path / "ui.db")
     window = MainWindow(path)
-    assert window.tabs.count() == 7
+    assert window.tabs.count() == 8
     editor = RecordEditor(window, path, "incident")
     editor.inputs["title"].setText("Teste do desktop")
     item_id = db.create_record(path, "incident", editor.values(), "teste-ui")

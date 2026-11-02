@@ -1,6 +1,6 @@
 # PT2VHF ITSM
 
-**MVP 0.1.0** — aplicação desktop de gestão de serviços de TI, com interface Windows,
+**MVP 0.2.0 (em evolução)** — aplicação desktop de gestão de serviços de TI, com interface Windows,
 persistência local SQLite e práticas inspiradas em ITIL.
 
 ## Escopo inicial
@@ -12,8 +12,10 @@ persistência local SQLite e práticas inspiradas em ITIL.
 | Habilitação de mudanças | Avaliação, aprovação, janela planejada, implementação, rollback, revisão |
 | Gerenciamento de problemas | Investigação, erro conhecido, resolução, relacionamento com registros |
 | Gerenciamento de ativos de TI | Cadastro, responsável, localização, identificação, estado, vínculos |
+| Gestão de níveis de serviço | Políticas de SLA por prática e prioridade, metas de resposta/resolução, dias úteis, feriados, estados de pausa, indicadores |
 
 O sistema inclui dashboard, pesquisa, histórico de ações, exportação CSV e backup SQLite.
+O menu superior **ITIL** abre mapa das 34 práticas, realçando as seis com módulo MVP parcial, e oferece navegação e exportação do roadmap.
 
 **Importante:** o pedido original citava "mudanças" duas vezes. A quinta prática foi
 interpretada como **gerenciamento de incidentes**, que complementa o ciclo operacional.
@@ -31,6 +33,10 @@ No PowerShell, na pasta do repositório:
     py -3.12 -m venv .venv
     .\.venv\Scripts\python.exe -m pip install -r requirements.txt
     .\.venv\Scripts\python.exe main.py
+
+Abra a aba **SLA**, cadastre uma política (código, prática, prioridade, metas e calendário), salve e crie um registro operacional. A política mais específica ativa compatível será atribuída automaticamente. O indicador de SLA aparece na lista de cada prática e no painel inicial. Pode atribuir manualmente outra política compatível ao editar o registro.
+
+**Importante:** os valores iniciais exibidos no formulário de SLA são apenas sugestões de preenchimento, não acordos reais. Valide metas com cada área demandante.
 
 O banco é criado em:
 
@@ -78,7 +84,12 @@ pronta para operação corporativa de missão crítica.**
 - Prioridade, prazo e risco são informados manualmente; não existe SLA
   com calendário útil, automação de escalonamento ou motor de regras.
 - Não há CMDB completa, catálogo de serviços, anexos, importação ou integrações.
-- Banco v1 não possui mecanismo de migração, portanto preserve backup antes de atualizar.
+- Banco SQLite usa migração idempotente v1 → v2 para políticas de SLA; preserve backup antes de atualizar.
+- O módulo de SLA contabiliza metas, não substitui definição contratual formal nem automação de alertas.
+- Políticas podem ser aplicadas automaticamente a novos registros de incidentes, requisições, mudanças e problemas.
+- Não há vínculo SLA por serviço porque o catálogo transversal permanece no backlog; por enquanto a seleção usa tipo e prioridade.
+- O relógio contabiliza minutos em calendários 24x7 ou comerciais, com fuso America/Sao_Paulo e feriados configurados por política.
+- Mudanças nos modelos de SLA não alteram registros já vinculados (snapshot).
 
 Utilize **Arquivo > Fazer backup do banco** para criar cópia consistente e
 **Arquivo > Exportar aba para CSV** para extrações simples.
