@@ -16,7 +16,8 @@ from PySide6.QtWidgets import (
     QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget,
 )
 
-from itsm import db
+from itsm import db, sla
+from itsm.sla_ui import SLATab
 
 STATUS_PT = {
     "new": "Novo", "triage": "Triagem", "in_progress": "Em andamento",
@@ -101,6 +102,20 @@ class RecordEditor(QDialog):
         self.inputs["priority"].addItems(db.PRIORITIES)
         self.inputs["priority"].setCurrentText(record.get("priority") or "P3")
         form.addRow("Prioridade", self.inputs["priority"])
+        policies = QComboBox()
+        if record:
+            policies.addItem("Manter política existente", "__keep__")
+        else:
+            policies.addItem("Aplicar política automaticamente", "__auto__")
+        policies.addItem("Sem SLA", 0)
+        for policy in sla.list_policies(path, active_only=True):
+            if policy["kind"] in ("*", kind):
+                policies.addItem(
+                    f"{policy['code']} | {policy['name']} | {policy['priority']}",
+                    policy["id"],
+                )
+        form.addRow("Política de SLA", policies)
+        self.inputs["sla_policy_id"] = policies
         self.inputs["description"] = QTextEdit()
         self.inputs["description"].setPlainText(record.get("description") or "")
         self.inputs["description"].setMaximumHeight(90)
@@ -158,7 +173,15 @@ class RecordEditor(QDialog):
             if isinstance(widget, QTextEdit):
                 data[key] = widget.toPlainText().strip()
             elif isinstance(widget, QComboBox):
-                data[key] = widget.currentData() if key in ("asset_id", "problem_id") else widget.currentText()
+                if key == "sla_policy_id":
+                    selection = widget.currentData()
+                    if selection not in ("__keep__", "__auto__"):
+                        data[key] = selection
+                else:
+                    data[key] = (
+                        widget.currentData() if key in ("asset_id", "problem_id")
+                        else widget.currentText()
+                    )
             else:
                 data[key] = widget.text().strip()
         return data
@@ -228,6 +251,7 @@ class DashboardTab(QWidget):
 
     def refresh(self):
         stats = db.dashboard(self.window.path)
+        sla_stats = sla.overview(self.window.path)
         self.summary.setText(
             "<h2>Operação</h2>"
             f"<p><b>Registros abertos:</b> {stats['open_records']} &nbsp;&nbsp; "
@@ -239,6 +263,11 @@ class DashboardTab(QWidget):
             f"Mudanças: <b>{stats['change']}</b> &nbsp;&nbsp; "
             f"Problemas: <b>{stats['problem']}</b></p>"
             f"<p>Ativos em operação: <b>{stats['active_assets']}</b></p>"
+            "<h2>Níveis de serviço</h2>"
+            f"<p>Com SLA: <b>{sla_stats['assigned']}</b> &nbsp;&nbsp; "
+            f"Em acompanhamento: <b>{sla_stats['active']}</b> &nbsp;&nbsp; "
+            f"Violados: <b>{sla_stats['breached']}</b> &nbsp;&nbsp; "
+            f"Em pausa: <b>{sla_stats['paused']}</b></p>"
         )
 
 class RecordsTab(QWidget):
@@ -275,15 +304,28 @@ class RecordsTab(QWidget):
     def refresh(self, *_):
         records = db.list_records(self.window.path, self.kind, self.search.text().strip())
         rows = []
+        evaluations = sla.evaluate_rows(self.window.path, records)
         for item in records:
+            metric = evaluations.get(item["id"])
+            if metric is None:
+                sla_label = "Sem SLA"
+            elif metric["status"] == "breached":
+                sla_label = "VIOLADO"
+            elif metric["resolution"]["completed"]:
+                sla_label = "Concluído no prazo"
+            elif metric["resolution"]["paused"]:
+                sla_label = "Em pausa"
+            else:
+                sla_label = "Em prazo"
             rows.append((item["id"], (
                 item["code"], item["title"], display_status(item["status"]),
                 item["priority"], item["requester"], item["assignee"],
-                item["asset_tag"] or "", item["updated_at"][:16].replace("T", " "),
+                item["asset_tag"] or "", sla_label,
+                item["updated_at"][:16].replace("T", " "),
             )))
         populate_table(self.table,
                        ("Código", "Título", "Estado", "Prioridade", "Solicitante",
-                        "Responsável", "Ativo", "Atualizado (UTC)"), rows)
+                        "Responsável", "Ativo", "SLA", "Atualizado (UTC)"), rows)
 
     def selected(self):
         item_id = selected_id(self.table)
@@ -478,9 +520,10 @@ class MainWindow(QMainWindow):
         for kind in ("incident", "request", "change", "problem"):
             self.pages.append(RecordsTab(self, kind))
         self.pages.append(AssetsTab(self))
+        self.pages.append(SLATab(self))
         self.pages.append(HistoryTab(self))
         for name, page in zip(
-            ("Painel", "Incidentes", "Requisições", "Mudanças", "Problemas", "Ativos", "Histórico"),
+            ("Painel", "Incidentes", "Requisições", "Mudanças", "Problemas", "Ativos", "SLA", "Histórico"),
             self.pages,
         ):
             self.tabs.addTab(page, name)
