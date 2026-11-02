@@ -495,8 +495,19 @@ class MainWindow(QMainWindow):
         csv_action = QAction("Exportar aba para CSV...", self)
         csv_action.triggered.connect(self.export_csv)
         file_menu.addAction(csv_action)
+        itil_menu = self.menuBar().addMenu("ITIL")
+        map_action = QAction("ITIL (Version 5) | Mapa das 34 práticas", self)
+        map_action.triggered.connect(self.show_itil_map)
+        itil_menu.addAction(map_action)
         self.statusBar().showMessage(f"Base local: {self.path}")
         self.refresh_all()
+
+    def show_itil_map(self):
+        from itsm.itil_map import ITILMapDialog
+        dialog = ITILMapDialog(
+            self, open_module=lambda index: self.tabs.setCurrentIndex(index)
+        )
+        dialog.exec()
 
     def actor_name(self):
         return self.operator.text().strip() or "local"
