@@ -242,7 +242,7 @@ def update_record(path, record_id, data, actor="local"):
     values = clean_record(data)
     explicit_sla = "sla_policy_id" in values
     sla_id = values.pop("sla_policy_id", None)
-    if not values:
+    if not values and not explicit_sla:
         return
     with connect(path) as db:
         before = row_dict(db.execute("SELECT * FROM records WHERE id=?", (record_id,)).fetchone())
