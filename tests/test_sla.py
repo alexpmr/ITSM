@@ -24,6 +24,10 @@ def policy(**overrides):
         "active": True,
     }
     values.update(overrides)
+    # Quando a prática é específica, restringir estados de pausa a estados válidos.
+    if values["kind"] != "*" and "pause_states" not in overrides:
+        valid = db.TRANSITIONS[values["kind"]]
+        values["pause_states"] = [state for state in values["pause_states"] if state in valid]
     return values
 
 
