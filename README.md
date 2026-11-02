@@ -1,6 +1,6 @@
 # PT2VHF ITSM
 
-**MVP 0.2.0 (em evolução)** — aplicação desktop de gestão de serviços de TI, com interface Windows,
+**MVP 0.3.0 (em evolução)** — aplicação desktop de gestão de serviços de TI, com interface Windows,
 persistência local SQLite e práticas inspiradas em ITIL.
 
 ## Escopo inicial
@@ -13,9 +13,10 @@ persistência local SQLite e práticas inspiradas em ITIL.
 | Gerenciamento de problemas | Investigação, erro conhecido, resolução, relacionamento com registros |
 | Gerenciamento de ativos de TI | Cadastro, responsável, localização, identificação, estado, vínculos |
 | Gestão de níveis de serviço | Políticas de SLA por prática e prioridade, metas de resposta/resolução, dias úteis, feriados, estados de pausa, indicadores |
+| Gestão da configuração de serviços (CMDB) | Cadastro de CIs, relações direcionais, impacto potencial, vínculo M:N com incidentes, requisições, mudanças e problemas, referência opcional ao ITAM |
 
 O sistema inclui dashboard, pesquisa, histórico de ações, exportação CSV e backup SQLite.
-O menu superior **ITIL** abre mapa das 34 práticas, realçando as seis com módulo MVP parcial, e oferece navegação e exportação do roadmap.
+O menu superior **ITIL** abre mapa das 34 práticas, realçando as sete com módulo MVP parcial, e oferece navegação e exportação do roadmap.
 
 **Importante:** o pedido original citava "mudanças" duas vezes. A quinta prática foi
 interpretada como **gerenciamento de incidentes**, que complementa o ciclo operacional.
@@ -83,8 +84,8 @@ pronta para operação corporativa de missão crítica.**
 - A trilha de auditoria pode ser alterada por quem controla o arquivo SQLite.
 - Prioridade, prazo e risco são informados manualmente; não existe SLA
   com calendário útil, automação de escalonamento ou motor de regras.
-- Não há CMDB completa, catálogo de serviços, anexos, importação ou integrações.
-- Banco SQLite usa migração idempotente v1 → v2 para políticas de SLA; preserve backup antes de atualizar.
+- Há CMDB funcional em escopo MVP, mas sem descoberta automática, reconciliação, baselines, catálogo de serviços, anexos ou integrações.
+- Banco SQLite usa migrações incrementais v1 → v2 (SLA) → v3 (CMDB), idempotentes; preserve backup antes de atualizar.
 - O módulo de SLA contabiliza metas, não substitui definição contratual formal nem automação de alertas.
 - Políticas podem ser aplicadas automaticamente a novos registros de incidentes, requisições, mudanças e problemas.
 - Não há vínculo SLA por serviço porque o catálogo transversal permanece no backlog; por enquanto a seleção usa tipo e prioridade.
@@ -104,3 +105,18 @@ certificado nem acreditado pela PeopleCert. Não distribui material proprietári
 das publicações ITIL.
 
 Projeto PT2VHF. Contribuições via issues e pull requests.
+
+
+## CMDB transversal (MVP 0.3)
+
+A aba **CMDB** administra itens de configuração (CIs) independentes de ativos patrimoniais.
+
+1. Cadastre CIs com código único, classe, ambiente, criticidade, situação, responsável e associação opcional com um ativo ITAM.
+2. Use **Relacionar CIs** para informar dependências direcionais: depends_on, hosted_on, supports e connects_to. Dependências circulares e auto-relacionamentos não são aceitos.
+3. Nos formulários de incidentes, requisições, problemas ou mudanças, use **Selecionar CIs** para relacionar múltiplos itens e seus papéis (affected, target, related).
+4. Use **Analisar impacto** sobre um CI para visualizar os CIs dependentes e os registros ITSM associados. A análise é topológica, não certifica indisponibilidade real; conexões genéricas não propagam impacto.
+5. A aba ITIL sinaliza *Service configuration management* como **MVP parcial**, totalizando sete práticas implementadas parcialmente.
+
+A CMDB mantém chaves estrangeiras e trilha de mudanças local. ITAM continua separado, com vínculo 1:1 opcional no MVP. O nome de serviço é provisoriamente texto livre; o catálogo de serviços transversal (#6) ainda não está pronto. A aplicação não descobre automaticamente configurações, não integra sistemas externos e não dispõe de controle de acesso corporativo.
+
+É recomendado criar backup antes de atualizar a aplicação.

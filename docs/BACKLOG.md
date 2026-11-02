@@ -20,7 +20,7 @@ Windows x64 é a plataforma inicial. GitHub é a fonte oficial.
 
 ## v0.2 — operação e qualidade
 - [x] SLA transversal MVP por prática/prioridade, metas de resposta/resolução, calendário 24x7/útil, feriados e pausas
-- [x] Indicadores SLA no dashboard e nos módulos; mapa ITIL com seis práticas em MVP parcial
+- [x] Indicadores SLA no dashboard e nos módulos; mapa ITIL com sete práticas em MVP parcial
 - [ ] SLA por serviço/oferta (depende do catálogo de serviços, issue #6)
 - [ ] Acordos contratuais, OLAs, escalonamento e notificações pré-violação
 - [x] Calendários úteis e relógios de pausa básicos; pendentes regras por serviço, escalonamento e notificações
@@ -29,7 +29,10 @@ Windows x64 é a plataforma inicial. GitHub é a fonte oficial.
 - [ ] Mudanças: categorias normal/padrão/emergencial; CAB; plano de teste; PIR; conflito de janelas
 - [ ] Problemas: causa-raiz, workaround, base de erros conhecidos (KEDB)
 - [ ] Ativos: ciclo de vida, contratos, garantias, importação CSV, descoberta, reconciliacão
-- [ ] CMDB separada de ITAM, serviços, CIs e dependências
+- [x] CMDB MVP independente do ITAM, cadastro de CIs, relações direcionais, criticidade e dependências
+- [x] CIs associados M:N a incidentes, requisições, mudanças e problemas, com análise de impacto topológica
+- [x] Referência opcional 1:1 de CI ao ativo, histórico local, migração SQLite v3 e acesso pelo menu ITIL
+- [ ] CMDB corporativa: descoberta, reconciliação, baselines, governança, APIs e associação ao catálogo (#6)
 - [ ] Anexos, comentários, tarefas, notificações e histórico mais detalhado
 - [ ] Busca avançada, exportação de relatórios, dashboards por prática
 - [ ] Localização PT-BR / EN / ES / FR

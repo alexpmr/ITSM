@@ -142,7 +142,7 @@ def test_schema_migration_is_idempotent(path):
     db.init_db(path)
     assert db.get_record(path, rid)["title"] == "Legado"
     with db.connect(path) as conn:
-        assert conn.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == 3
 
 
 def test_immediate_first_response_same_second(monkeypatch, path):

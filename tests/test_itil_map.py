@@ -14,9 +14,9 @@ def test_itil_map_has_34_unique_practices():
     assert sum(p.group == GROUP_GENERAL for p in PRACTICES) == 12
 
 def test_only_delivered_modules_are_highlighted():
-    assert IMPLEMENTED_MVP == {"incident", "request", "change", "problem", "itam", "service_level"}
+    assert IMPLEMENTED_MVP == {"incident", "request", "change", "problem", "itam", "service_level", "service_configuration"}
     assert set(MODULE_TABS) == IMPLEMENTED_MVP
-    assert counts() == {"total": 34, "mvp": 6, "planned": 28}
+    assert counts() == {"total": 34, "mvp": 7, "planned": 27}
     for key in IMPLEMENTED_MVP:
         assert implementation_status(key) == "mvp"
         assert summary(key)["tab_index"] is not None
