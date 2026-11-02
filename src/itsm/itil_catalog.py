@@ -68,10 +68,10 @@ BY_KEY = {p.key: p for p in PRACTICES}
 # Manter apenas chaves cujo fluxo está realmente disponível no sistema.
 # "mvp" significa capacidade implementada em escopo reduzido,
 # NÃO conformidade completa com o guia ITIL.
-IMPLEMENTED_MVP = frozenset(("incident", "request", "change", "problem", "itam"))
+IMPLEMENTED_MVP = frozenset(("incident", "request", "change", "problem", "itam", "service_level"))
 
 # Mapeia prática para aba funcional existente; índice é aplicado no main window.
-MODULE_TABS = {"incident": 1, "request": 2, "change": 3, "problem": 4, "itam": 5}
+MODULE_TABS = {"incident": 1, "request": 2, "change": 3, "problem": 4, "itam": 5, "service_level": 6}
 
 # Sumários escritos para refletir SOMENTE o que foi programado nesta versão.
 DELIVERED = {
@@ -95,14 +95,18 @@ DELIVERED = {
         "Inventário local com patrimônio, tipo, série, proprietário, localização, "
         "estado do ativo e vínculo com registros de atendimento."
     ),
+    "service_level": (
+        "Políticas de SLA reutilizadas por incidentes, requisições, mudanças e problemas; "
+        "metas de resposta/resolução, calendários úteis, feriados, pausas e indicadores."
+    ),
 }
 NEXT_STEPS = {
-    "incident": "SLA, incidente maior, matriz impacto x urgência, escalonamentos e vinculação a serviços.",
+    "incident": "SLA implementado em MVP; pendentes incidente maior, matriz de impacto, escalonamentos e serviços.",
     "request": "Catálogo de serviços, formulários parametrizáveis, aprovações com identidade verificada e automação.",
     "change": "CAB, tipos normal/padrão/emergencial, calendário, análise de risco e avaliação pós-implementação.",
     "problem": "Causa-raiz, workaround, KEDB, identificação de tendências e vínculos com mudanças.",
     "itam": "Ciclo de vida completo, contratos, garantias, importação, descoberta, reconciliação e CMDB separada.",
-    "service_level": "SLAs/OLAs, calendários, metas por serviço e monitoramento de desempenho.",
+    "service_level": "Vínculo ao catálogo de serviços, OLA, escalonamento, XLA, alertas e medições contratuais.",
     "service_catalog": "Catálogo configurável, modelos de requisição, aprovações e ciclos de publicação.",
     "service_configuration": "Modelo de CIs, relacionamentos, serviços e impactos; CMDB não se confunde com ITAM.",
     "monitoring_event": "Integrações com Zabbix e outras fontes para eventos, correlação e geração de incidentes.",
