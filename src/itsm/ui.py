@@ -16,7 +16,8 @@ from PySide6.QtWidgets import (
     QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget,
 )
 
-from itsm import db, sla
+from itsm import db, sla, cmdb
+from itsm.cmdb_ui import CMDBTab, CIChooser
 from itsm.sla_ui import SLATab
 
 STATUS_PT = {
@@ -129,6 +130,21 @@ class RecordEditor(QDialog):
         form.addRow("Ativo relacionado", assets)
         self.inputs["asset_id"] = assets
 
+        self.selected_cis = (
+            [(link["ci_id"], link["link_type"])
+             for link in cmdb.list_record_cis(path, record["id"])]
+            if record.get("id") else []
+        )
+        ci_row = QHBoxLayout()
+        self.cis_display = QLabel()
+        self.cis_display.setWordWrap(True)
+        ci_row.addWidget(self.cis_display, 1)
+        choose_cis_button = QPushButton("Selecionar CIs...")
+        choose_cis_button.clicked.connect(lambda: self.choose_cis(path))
+        ci_row.addWidget(choose_cis_button)
+        form.addRow("Itens de configuração (CMDB)", ci_row)
+        self.update_ci_display()
+
         if kind != "problem":
             problems = QComboBox()
             problems.addItem("Sem problema relacionado", None)
@@ -167,6 +183,20 @@ class RecordEditor(QDialog):
         buttons.rejected.connect(self.reject)
         root.addWidget(buttons)
 
+    def update_ci_display(self):
+        n = len(self.selected_cis)
+        self.cis_display.setText(
+            f"{n} CI(s) relacionado(s)" if n else "Sem CIs relacionados"
+        )
+
+    def choose_cis(self, path):
+        dlg = CIChooser(
+            self, path, existing=self.selected_cis, kind=self.kind
+        )
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            self.selected_cis = dlg.values()
+            self.update_ci_display()
+
     def values(self):
         data = {}
         for key, widget in self.inputs.items():
@@ -184,6 +214,7 @@ class RecordEditor(QDialog):
                     )
             else:
                 data[key] = widget.text().strip()
+        data["ci_ids"] = list(self.selected_cis)
         return data
 
 class AssetEditor(QDialog):
@@ -252,6 +283,7 @@ class DashboardTab(QWidget):
     def refresh(self):
         stats = db.dashboard(self.window.path)
         sla_stats = sla.overview(self.window.path)
+        config_stats = cmdb.stats(self.window.path)
         self.summary.setText(
             "<h2>Operação</h2>"
             f"<p><b>Registros abertos:</b> {stats['open_records']} &nbsp;&nbsp; "
@@ -268,6 +300,10 @@ class DashboardTab(QWidget):
             f"Em acompanhamento: <b>{sla_stats['active']}</b> &nbsp;&nbsp; "
             f"Violados: <b>{sla_stats['breached']}</b> &nbsp;&nbsp; "
             f"Em pausa: <b>{sla_stats['paused']}</b></p>"
+            "<h2>Configuração de serviços (CMDB)</h2>"
+            f"<p>CIs cadastrados: <b>{config_stats['cis']}</b> &nbsp;&nbsp; "
+            f"Dependências e relações: <b>{config_stats['relations']}</b> &nbsp;&nbsp; "
+            f"Registros vinculados: <b>{config_stats['linked_records']}</b></p>"
         )
 
 class RecordsTab(QWidget):
@@ -323,12 +359,12 @@ class RecordsTab(QWidget):
             rows.append((item["id"], (
                 item["code"], item["title"], display_status(item["status"]),
                 item["priority"], item["requester"], item["assignee"],
-                item["asset_tag"] or "", sla_label,
+                item["asset_tag"] or "", item["ci_count"], sla_label,
                 item["updated_at"][:16].replace("T", " "),
             )))
         populate_table(self.table,
                        ("Código", "Título", "Estado", "Prioridade", "Solicitante",
-                        "Responsável", "Ativo", "SLA", "Atualizado (UTC)"), rows)
+                        "Responsável", "Ativo", "CIs", "SLA", "Atualizado (UTC)"), rows)
 
     def selected(self):
         item_id = selected_id(self.table)
@@ -566,9 +602,10 @@ class MainWindow(QMainWindow):
             self.pages.append(RecordsTab(self, kind))
         self.pages.append(AssetsTab(self))
         self.pages.append(SLATab(self))
+        self.pages.append(CMDBTab(self))
         self.pages.append(HistoryTab(self))
         for name, page in zip(
-            ("Painel", "Incidentes", "Requisições", "Mudanças", "Problemas", "Ativos", "SLA", "Histórico"),
+            ("Painel", "Incidentes", "Requisições", "Mudanças", "Problemas", "Ativos", "SLA", "CMDB", "Histórico"),
             self.pages,
         ):
             self.tabs.addTab(page, name)
