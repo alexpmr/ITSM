@@ -152,8 +152,9 @@ def init_db(path: str | Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     with connect(path) as db:
         db.executescript(SCHEMA)
-        from itsm import sla
+        from itsm import sla, cmdb
         sla.init_schema(db)
+        cmdb.init_schema(db)
     return path
 
 def row_dict(row):
@@ -213,8 +214,10 @@ def get_record(path, record_id):
 def create_record(path, kind, data, actor="local"):
     if kind not in KINDS:
         raise ValueError("Tipo de registro inválido.")
-    from itsm import sla
-    values = clean_record(data, is_new=True)
+    from itsm import sla, cmdb
+    raw = dict(data)
+    ci_ids = raw.pop("ci_ids", [])
+    values = clean_record(raw, is_new=True)
     explicit_sla = "sla_policy_id" in values
     sla_id = values.pop("sla_policy_id", None)
     now = utc_now()
@@ -233,16 +236,21 @@ def create_record(path, kind, data, actor="local"):
         db.execute("UPDATE records SET code=? WHERE id=?", (code, record_id))
         sla.assign_record(db, record_id, kind, values.get("priority", "P3"),
                           requested=sla_id, automatic=not explicit_sla, at=now)
+        if ci_ids:
+            cmdb._set_record_cis(db, record_id, ci_ids, actor)
         after = row_dict(db.execute("SELECT * FROM records WHERE id=?", (record_id,)).fetchone())
         record_audit(db, "record", record_id, "created", actor, {}, after)
     return record_id
 
 def update_record(path, record_id, data, actor="local"):
-    from itsm import sla
-    values = clean_record(data)
+    from itsm import sla, cmdb
+    raw = dict(data)
+    explicit_cis = "ci_ids" in raw
+    ci_ids = raw.pop("ci_ids", [])
+    values = clean_record(raw)
     explicit_sla = "sla_policy_id" in values
     sla_id = values.pop("sla_policy_id", None)
-    if not values and not explicit_sla:
+    if not values and not explicit_sla and not explicit_cis:
         return
     with connect(path) as db:
         before = row_dict(db.execute("SELECT * FROM records WHERE id=?", (record_id,)).fetchone())
@@ -259,7 +267,7 @@ def update_record(path, record_id, data, actor="local"):
                 raise ValueError(
                     "Prioridade mudou: selecione uma política SLA compatível ou Sem SLA."
                 )
-        if not changed and not explicit_sla:
+        if not changed and not explicit_sla and not explicit_cis:
             return
         if changed:
             changed["updated_at"] = utc_now()
@@ -270,6 +278,8 @@ def update_record(path, record_id, data, actor="local"):
             effective_priority = changed.get("priority", before["priority"])
             sla.assign_record(db, record_id, before["kind"], effective_priority,
                               requested=sla_id, automatic=False)
+        if explicit_cis:
+            cmdb._set_record_cis(db, record_id, ci_ids, actor)
         after = row_dict(db.execute("SELECT * FROM records WHERE id=?", (record_id,)).fetchone())
         record_audit(db, "record", record_id, "updated", actor, before, after)
 
@@ -333,7 +343,8 @@ def list_records(path, kind=None, query=""):
     if kind is not None and kind not in KINDS:
         raise ValueError("Tipo inválido.")
     sql = (
-        "SELECT r.*, a.tag AS asset_tag, p.code AS problem_code "
+        "SELECT r.*, a.tag AS asset_tag, p.code AS problem_code, "
+        "(SELECT count(*) FROM record_cis rc WHERE rc.record_id=r.id) AS ci_count "
         "FROM records r LEFT JOIN assets a ON a.id=r.asset_id "
         "LEFT JOIN records p ON p.id=r.problem_id WHERE 1=1"
     )
