@@ -18,6 +18,13 @@ Windows x64 é a plataforma inicial. GitHub é a fonte oficial.
 - [x] Testes de fluxo e persistência
 - [ ] Testes end-to-end de interface em runner Windows e assinatura de código
 
+## Distribuição e atualização do aplicativo (OTA)
+- [x] CI para Windows x64, com executável portátil e instalador publicados nas GitHub Releases.
+- [x] Tabela da última versão e contadores de downloads cumulativos no README.
+- [ ] **[OTA pelo GitHub Releases — issue #9](https://github.com/alexpmr/ITSM/issues/9):** verificar atualizações ao iniciar (opcional) e manualmente pelo menu Ajuda, comparar versões e mostrar notas.
+- [ ] Download com progresso e cancelamento, seleção de Setup/portátil, SHA-256 verificável, confirmação de atualização, mecanismo externo para substituir EXE, preservação de SQLite e testes de falha/rollback.
+- [ ] Atualizar o workflow de Releases para publicar e validar um manifesto de checksums consumido pelo OTA.
+
 ## v0.2 — operação e qualidade
 - [x] SLA transversal MVP por prática/prioridade, metas de resposta/resolução, calendário 24x7/útil, feriados e pausas
 - [x] Indicadores SLA no dashboard e nos módulos; mapa ITIL com sete práticas em MVP parcial
