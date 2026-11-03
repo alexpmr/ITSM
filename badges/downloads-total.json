@@ -1,6 +1,6 @@
 {
-  "color": "lightgrey",
+  "color": "blue",
   "label": "Total downloads",
-  "message": "0",
+  "message": "1",
   "schemaVersion": 1
 }
