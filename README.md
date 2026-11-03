@@ -1,5 +1,29 @@
 # PT2VHF ITSM
 
+**Última versão: MVP v0.3.0 — Windows 10/11 x64**
+
+[![Última versão](https://img.shields.io/github/v/release/alexpmr/ITSM?label=vers%C3%A3o&color=blue)](https://github.com/alexpmr/ITSM/releases/latest)
+![Downloads acumulados](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Falexpmr%2FITSM%2Fmain%2Fbadges%2Fdownloads-total.json)
+![Build Windows](https://img.shields.io/github/actions/workflow/status/alexpmr/ITSM/windows.yml?branch=main&label=build)
+
+## Downloads da última versão
+
+| Plataforma | Download | Versão | Downloads cumulativos (todas as versões) |
+|:--|:--|:--|:--|
+| **Windows x64 — Instalador** | [**Baixar Setup (.exe)**](https://github.com/alexpmr/ITSM/releases/latest/download/PT2VHF-ITSM-Windows-x64-Setup.exe) | [![versão](https://img.shields.io/github/v/release/alexpmr/ITSM?label=vers%C3%A3o)](https://github.com/alexpmr/ITSM/releases/latest) | ![Contagem instalador](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Falexpmr%2FITSM%2Fmain%2Fbadges%2Fdownloads-instalador.json) |
+| **Windows x64 — Portátil** | [**Baixar Portable (.exe)**](https://github.com/alexpmr/ITSM/releases/latest/download/PT2VHF-ITSM-Windows-x64-Portable.exe) | [![versão](https://img.shields.io/github/v/release/alexpmr/ITSM?label=vers%C3%A3o)](https://github.com/alexpmr/ITSM/releases/latest) | ![Contagem portátil](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Falexpmr%2FITSM%2Fmain%2Fbadges%2Fdownloads-portatil.json) |
+
+[**Ver todas as versões e arquivos de distribuição**](https://github.com/alexpmr/ITSM/releases)
+
+**Como funciona:** os links `releases/latest/download` sempre apontam à última versão publicada, sem URLs temporárias de GitHub Actions. O pipeline executa testes, gera instalador e portátil, e publica uma Release permanente por versão. Para lançar uma versão nova, altere `__version__` em `src/itsm/__init__.py`.
+
+**Contadores reais:** somatório dos downloads por tipo em todas as GitHub Releases, atualizado automaticamente a cada seis horas. Não inclui downloads de artefatos temporários de CI. A contagem de versões anteriores permanece preservada.
+
+> **MVP para testes:** os executáveis não são assinados digitalmente; compatibilidade Windows ainda está em validação. Não há instaladores Linux/macOS. O SQLite é local, não criptografado, e a aplicação não possui autenticação corporativa; não utilize dados sensíveis.
+
+---
+
+
 **MVP 0.3.0 (em evolução)** — aplicação desktop de gestão de serviços de TI, com interface Windows,
 persistência local SQLite e práticas inspiradas em ITIL.
 
@@ -53,10 +77,7 @@ O comando verifica os testes e empacota em:
 
     dist\PT2VHF-ITSM.exe
 
-Também há um pipeline GitHub Actions em **Actions > CI e build Windows**.
-Quando o workflow completar com sucesso, o EXE poderá ser obtido no artefato
-**PT2VHF-ITSM-Windows-x64** da execução. O executável é portátil, não é
-um instalador MSI e ainda não é assinado digitalmente.
+O pipeline GitHub Actions executa testes, gera um **instalador Windows (Inno Setup)** e o **EXE portátil (PyInstaller)**, e publica os dois na Release da versão, além dos artefatos temporários de CI. Os executáveis ainda não são assinados digitalmente.
 
 ## Testes
 
@@ -82,8 +103,7 @@ pronta para operação corporativa de missão crítica.**
 - Nome do operador é informado livremente na tela; não há autenticação,
   segregação de funções, RBAC nem aprovação eletrônica com identidade validada.
 - A trilha de auditoria pode ser alterada por quem controla o arquivo SQLite.
-- Prioridade, prazo e risco são informados manualmente; não existe SLA
-  com calendário útil, automação de escalonamento ou motor de regras.
+- Prioridade e risco são informados manualmente; existe contabilização de SLA com calendário útil, mas não há automação de escalonamento ou motor completo de regras.
 - Há CMDB funcional em escopo MVP, mas sem descoberta automática, reconciliação, baselines, catálogo de serviços, anexos ou integrações.
 - Banco SQLite usa migrações incrementais v1 → v2 (SLA) → v3 (CMDB), idempotentes; preserve backup antes de atualizar.
 - O módulo de SLA contabiliza metas, não substitui definição contratual formal nem automação de alertas.
